@@ -62,21 +62,21 @@ FROM grade;
 -- 학번, 이름, 학과번호를 조회하시오.
 SELECT student_no, student_name, department_no
 FROM student
-WHERE absence_yn = "Y";
+WHERE absence_yn = 'Y';
 
 -- 문제 10
 -- DEPARTMENT 테이블에서 정원(CAPACITY)이 25명 이상인 학과의 
 -- 학과명, 분류, 정원을 조회하시오.
 SELECT department_name, category, capacity
 FROM department
-WHERE capacity >= 25;
+WHERE capacity >= '25';
 
 -- 문제 11
 -- STUDENT 테이블에서 학과번호가 '001'이 아닌 학생의 
 -- 이름, 학과번호, 주소를 조회하시오.
 SELECT student_name, department_no, student_address
 FROM student
-WHERE department_no <> 001;
+WHERE department_no <> '001';
 
 -- 문제 12
 -- GRADE 테이블에서 성적(POINT)이 4.0 이상인 성적 데이터의 
@@ -123,7 +123,8 @@ WHERE student_address LIKE '서울시%';
 -- 학번, 과목번호, 성적을 조회하시오.
 SELECT student_no, class_no, point 
 FROM grade
-WHERE point >= 3.0 AND point < 4.0;
+WHERE point >= 3.0 
+AND point < 4.0;
 
 -- 문제 18
 -- STUDENT 테이블에서 지도교수번호(COACH_PROFESSOR_NO)가 'P001'인 학생의 
