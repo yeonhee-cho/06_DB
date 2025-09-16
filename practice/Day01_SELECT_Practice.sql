@@ -123,8 +123,7 @@ WHERE student_address LIKE '서울시%';
 -- 학번, 과목번호, 성적을 조회하시오.
 SELECT student_no, class_no, point 
 FROM grade
-WHERE point >= 3.0 
-AND point < 4.0;
+WHERE point >= 3.0 AND point < 4.0;
 
 -- 문제 18
 -- STUDENT 테이블에서 지도교수번호(COACH_PROFESSOR_NO)가 'P001'인 학생의 
