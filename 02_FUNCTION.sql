@@ -159,9 +159,9 @@ FROM employees;
 -- 이름 오름차순에서 제일 먼저 작성되는 이름
 -- 마지막에 작성되는 이름
 SELECT MIN(hire_date) AS `최초 입사일`,
-MAX(hire_date) AS `최근 입사일`,
-MIN(full_name) AS `가나다 순 첫번째`,
-MAX(full_name) AS `가나다 순 마지막`
+	   MAX(hire_date) AS `최근 입사일`,
+	   MIN(full_name) AS `가나다 순 첫번째`,
+	   MAX(full_name) AS `가나다 순 마지막`
 FROM employees
 WHERE employment_status = 'Active';
 
@@ -177,7 +177,7 @@ WHERE employment_status = 'Active';
 SELECT COUNT(*)
 FROM employees e
 JOIN departments d ON e.dept_id = d.dept_id
-WHERE dept_code LIKE 'DEV';
+WHERE dept_code = 'DEV';
 
 -- 전화번호가 있는 사원 수 COUNT(*)
 SELECT COUNT(*)
@@ -189,8 +189,26 @@ WHERE phone IS NOT NULL;
 SELECT COUNT(phone)
 FROM employees;
 
--- 테이블에 존재하는 부서코드의 수를 조회 dept_code 중복없이 조회
--- JOIN departments dept_id
+-- 테이블에 존재하는 부서코드의 수를 조회 
+-- dept_code 중복없이 조회
 SELECT COUNT(DISTINCT d.dept_code)
 FROM employees e
 JOIN departments d ON e.dept_id = d.dept_id;
+
+-- WHERE 절로 변경해서 조회하기
+-- employees 테이블에서 부서 코드가 DEV인 사원의 수
+SELECT COUNT(*)
+FROM employees e, departments d
+WHERE e.dept_id = d.dept_id
+AND dept_code = 'DEV';
+
+-- 테이블에 존재하는 부서코드의 수를 조회 
+-- dept_code 중복없이 조회
+SELECT COUNT(DISTINCT d.dept_code)
+FROM employees e, departments d
+WHERE e.dept_id = d.dept_id;
+
+-- employees 테이블에 존재하는 남자 사원의 수
+SELECT COUNT(*)
+FROM employees
+WHERE gender = 'M';
