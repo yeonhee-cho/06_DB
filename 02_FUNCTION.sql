@@ -111,6 +111,10 @@ AVG(숫자만 기록된 컬럼명) : 그룹의 평균
 
 MAX(컬럼명) : 최대값
 MIN(컬럼명) : 최소값
+
+날짜 대소 비교 : 과거 < 미래
+문자열 대소 비교 : 유니코드 순서(문자열 순서 A < Z)
+
 COUNT(* | [DISTINCT] 컬럼명) : 조회된 행의 개수를 반환
 COUNT(*) : 조회된 모든 행의 개수를 반환
 
@@ -119,3 +123,74 @@ COUNT(컬럼명) : 지정된 컬럼 값이 NULL이 아닌 행의 개수를 반�
 COUNT(DISTINCT 컬럼명) : 지정된 컬럼에서 중복 값을 제외한 행의 개수를 반환
 			(NULL인 행 미포함)
 ***************************/
+
+-- 모든 사원의 급여 합
+SELECT SUM(salary)
+FROM employees;
+
+-- 모든 활성 사원의 급여 합
+-- salary employment_status = 'Active'
+SELECT SUM(salary), employment_status
+FROM employees
+WHERE employment_status = 'Active';
+
+-- 2020년 이후(2020년 포함) 입사자들의 급여 합 조회
+-- WHERE YEAR(hire_date) >= 2020
+SELECT SUM(salary)
+FROM employees
+WHERE YEAR(hire_date) >=  '2020';
+
+-- 모든 사원의 평균 급여 조회
+SELECT AVG(salary)
+FROM employees;
+
+-- 모든 활성 사원의 급여 평균 조회(소수점 내림 처리)
+-- salary employment_status = 'Active'
+SELECT floor(AVG(salary))
+FROM employees
+WHERE employment_status = 'Active';
+
+
+-- AS 급여 합계 AS 평균 급여를 이용해서 합계와 평균을 모두 조회
+SELECT SUM(salary) AS `급여 합계`, AVG(salary) AS `평균 급여`
+FROM employees;
+
+-- 모든 사원 중 가장 빠른 입사일, 최근 입사일
+-- 이름 오름차순에서 제일 먼저 작성되는 이름
+-- 마지막에 작성되는 이름
+SELECT MIN(hire_date) AS `최초 입사일`,
+MAX(hire_date) AS `최근 입사일`,
+MIN(full_name) AS `가나다 순 첫번째`,
+MAX(full_name) AS `가나다 순 마지막`
+FROM employees
+WHERE employment_status = 'Active';
+
+-- COUNT 사용하기
+-- employees 테이블에서 전체 활성 사원 수
+SELECT COUNT(*)
+FROM employees
+WHERE employment_status = 'Active';
+
+-- employees 테이블에서 부서 코드가 DEV인 사원의 수
+-- JOIN ON
+-- WHERE AND
+SELECT COUNT(*)
+FROM employees e
+JOIN departments d ON e.dept_id = d.dept_id
+WHERE dept_code LIKE 'DEV';
+
+-- 전화번호가 있는 사원 수 COUNT(*)
+SELECT COUNT(*)
+FROM employees
+WHERE phone IS NOT NULL;
+
+-- 전화번호가 있는 사원 수
+-- NULL 이 아닌 행의 수만 카운트
+SELECT COUNT(phone)
+FROM employees;
+
+-- 테이블에 존재하는 부서코드의 수를 조회 dept_code 중복없이 조회
+-- JOIN departments dept_id
+SELECT COUNT(DISTINCT d.dept_code)
+FROM employees e
+JOIN departments d ON e.dept_id = d.dept_id;
