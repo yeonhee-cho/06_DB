@@ -1,38 +1,40 @@
--- Q1. 문제: STUDENT 테이블에서 학생 이름의 길이가 3글자인 학생의 학번, 이름을 조회하시오.
+USE chun_university;
 
+-- Q1. 문제: STUDENT 테이블에서 학생 이름의 길이가 3글자인 학생의 학번, 이름을 조회하시오.
 -- 힌트: LENGTH(컬럼명) 함수 사용
 -- WHERE 절에 LENGTH(STUDENT_NAME) = 3 조건 추가
-SELECT
+SELECT * FROM student;
+SELECT student_no AS 학번, student_name AS 이름
+FROM student
+WHERE LENGTH(student_name) = 3; -- 왜?? 안나옴???
 
 -- Q2. 문제: STUDENT 테이블에서 주민등록번호 앞 6자리를 생년월일로 하여
 -- 학번, 이름, 생년월일을 조회하시오. (별칭: 생년월일)
-
 -- 힌트: SUBSTRING(문자열, 시작위치, 길이) 사용
 -- 주민번호 형태: YYMMDD-XXXXXXX, 앞 6자리 추출
-SELECT
-
-
+SELECT student_no AS `학번`, student_name AS `이름`, SUBSTRING(student_ssn,1,6) AS `생년월일`
+FROM student;
 
 -- Q3. 문제: DEPARTMENT 테이블에서 학과명에 '학과'를 '전공'으로 바꾼 결과를
 -- 학과번호, 기존학과명, 변경학과명으로 조회하시오.
-
 -- 힌트: REPLACE(문자열, 찾을문자열, 바꿀문자열) 사용
-SELECT
-
+SELECT department_no AS `학과번호`, department_name AS `기존학과명`, REPLACE(department_name, '학과', '전공') AS `변경학과명`
+FROM department;
 
 -- Q4. 문제: STUDENT 테이블에서 주민등록번호에서 '-' 문자의 위치를 찾아
 -- 성별구분번호(주민등록번호 뒷자리 첫 번째 숫자)를 추출하여
 -- 학번, 이름, 성별구분번호를 조회하시오.
-
 -- 힌트: LOCATE('-', 주민번호)로 '-' 위치 찾기
 -- SUBSTRING(주민번호, LOCATE('-', 주민번호) + 1, 1)로 성별구분번호 추출
-SELECT
+SELECT student_no AS 학번, student_name AS 이름, SUBSTRING(student_ssn, LOCATE('-', student_ssn) + 1, 1) AS 성별구분번호
+FROM student;
 
 -- Q5. 문제: GRADE 테이블에서 모든 학점을 소수점 첫째자리까지 반올림하여
 -- 학기번호, 과목번호, 학번, 반올림학점으로 조회하시오.
-
 -- 힌트: ROUND(숫자, 자릿수) 사용, 첫째자리는 1
-SELECT
+SELECT term_no AS 학기번호, class_no AS 과목번호, student_no AS 학번, ROUND(point) AS 반올림학점
+FROM grade;
+
 
 -- Q6. 문제: STUDENT 테이블에서 학번의 마지막 숫자가 짝수인 학생들의 학번, 이름을 조회하시오.
 

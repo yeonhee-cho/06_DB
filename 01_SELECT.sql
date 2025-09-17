@@ -494,7 +494,7 @@ SELECT employees.dept_id, employees.full_name, departments.dept_name
 FROM employees
 INNER JOIN departments ON employees.dept_id = departments.dept_id;
 
--- 별칭 넣기 TODO 별칭은 대문자인가?
+-- 별칭 넣기 -- * NOTE 별칭은 대문자인가? -> 소문자로 쓰기!!
 SELECT E.dept_id, E.full_name, D.dept_name
 FROM employees E
 INNER JOIN departments D ON E.dept_id = D.dept_id; 
