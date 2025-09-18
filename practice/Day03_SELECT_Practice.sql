@@ -6,7 +6,15 @@ USE chun_university;
 SELECT * FROM student;
 SELECT student_no AS 학번, student_name AS 이름
 FROM student
-WHERE LENGTH(student_name) = 3; -- 왜?? 안나옴???
+WHERE LENGTH(student_name) = 9; 
+-- 왜?? 안나옴???
+-- -> LENGTH는 byte 길이
+/*
+영어(대소문자)와 숫자 : 한 글자 당 1byte
+특수 문자나 비영어 문자 : 한 글자 당 2 ~ 4btye
+한글, 일본, 중국어와 같은 문자 : 한 글자 당 3byte
+이모지 : 4byte
+*/
 
 -- Q2. 문제: STUDENT 테이블에서 주민등록번호 앞 6자리를 생년월일로 하여
 -- 학번, 이름, 생년월일을 조회하시오. (별칭: 생년월일)
@@ -32,24 +40,23 @@ FROM student;
 -- Q5. 문제: GRADE 테이블에서 모든 학점을 소수점 첫째자리까지 반올림하여
 -- 학기번호, 과목번호, 학번, 반올림학점으로 조회하시오.
 -- 힌트: ROUND(숫자, 자릿수) 사용, 첫째자리는 1
-SELECT term_no AS 학기번호, class_no AS 과목번호, student_no AS 학번, ROUND(point) AS 반올림학점
+SELECT term_no AS 학기번호, class_no AS 과목번호, student_no AS 학번, ROUND(point, 1) AS 반올림학점
 FROM grade;
 
 
 -- Q6. 문제: STUDENT 테이블에서 학번의 마지막 숫자가 짝수인 학생들의 학번, 이름을 조회하시오.
-
 -- 힌트: SUBSTRING(학번, -1, 1)로 마지막 글자 추출
 -- MOD(숫자, 2) = 0으로 짝수 판별
-SELECT
-
-
+SELECT student_no AS 학번, student_name AS 이름
+FROM student
+WHERE MOD(SUBSTRING(student_no, -1, 1), 2) = 0;
 
 -- Q7. 문제: PROFESSOR 테이블에서 교수 이름의 성(첫 글자)과 이름 길이를 조회하시오.
 -- 출력 형태: 교수번호, 교수명, 성, 이름길이
-
 -- 힌트: SUBSTRING(이름, 1, 1)로 첫 글자 추출
 -- LENGTH(이름)로 길이 계산
-SELECT
+SELECT professor_no AS 교수번호, professor_name AS 교수명, SUBSTRING(professor_name, 1, 1) AS 성, LENGTH(professor_name) AS 이름길이
+FROM professor;
 
 
 -- Q8. 문제: STUDENT 테이블에서 주민등록번호를 이용해 성별을 구분하여
@@ -58,22 +65,24 @@ SELECT
 
 -- 힌트: 서브쿼리나 조건문 없이 단순한 방법 사용
 -- 성별구분번호를 먼저 확인해보고 직접 조건 작성
-SELECT
+SELECT student_no AS 학번, student_name AS 이름, SUBSTRING(student_ssn, LOCATE('-', student_ssn) + 1, 1) AS `성별(남/여)`
+FROM student;
 
 
 
 -- Q9. 문제: CLASS 테이블에서 과목번호 길이를 확인하고 현재 형태를 조회하시오.
 -- 출력: 과목번호, 과목번호길이, 과목명
-
 -- 힌트: LENGTH() 함수로 현재 과목번호의 길이 확인
-SELECT
+SELECT * 
+FROM class;
 
 
 -- Q10. 문제: DEPARTMENT 테이블에서 학과명의 첫 두 글자를 추출하여 조회하시오.
 -- 출력: 학과번호, 학과명, 첫두글자
 
 -- 힌트: SUBSTRING(학과명, 1, 2)로 첫 두글자 추출
-SELECT
+SELECT * 
+FROM department;
 
 
 
@@ -81,7 +90,8 @@ SELECT
 -- 출력: 전체학생수
 
 -- 힌트: COUNT(*) 사용
-SELECT
+SELECT *
+FROM student;
 
 -- Q12. 문제: 휴학생 수를 조회하시오.
 -- 출력: 휴학생수

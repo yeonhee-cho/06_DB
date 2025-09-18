@@ -1,44 +1,102 @@
 -- 문제 1
 -- CUSTOMERS 테이블에서 고객명과 이메일 길이를 조회하고, 이메일 길이를 기준으로 내림차순 정렬하시오.
+SELECT * FROM customers;
+
+SELECT customer_name, LENGTH(email)
+FROM customers
+ORDER BY LENGTH(email) DESC;
 
 -- 문제 2
 -- STORES 테이블에서 가게명의 길이가 10자 이상인 가게들의 이름과 글자 수를 조회하시오.
+SELECT store_name AS 가게이름, LENGTH(store_name) AS 글자수
+FROM stores
+WHERE LENGTH(store_name) >= 10;
 
 -- 문제 3
 -- CUSTOMERS 테이블에서 이메일에서 '@' 문자의 위치를 찾아 고객명, 이메일, '@위치'로 조회하시오.
+SELECT customer_name, email, LOCATE('@', email)
+FROM customers;
 
 -- 문제 4
 -- CUSTOMERS 테이블에서 고객명, 이메일에서 아이디 부분만 추출하여 '이메일 아이디'라는 별칭으로 조회하시오.
+SELECT customer_name, SUBSTRING(email, 1, LOCATE('@', email) - 1) AS `이메일 아이디`
+FROM customers;
 
 -- 문제 5
 -- CUSTOMERS 테이블에서 고객명, 이메일 아이디, 이메일 도메인을 각각 분리하여 조회하시오.
+SELECT customer_name, SUBSTRING(email, 1, LOCATE('@', email) - 1) AS `이메일 아이디`, SUBSTRING(email, LOCATE('@', email) + 1) AS `이메일 도메인`
+FROM customers;
 
 -- 문제 6
 -- MENUS 테이블에서 메뉴명에 '치킨'이라는 단어가 포함된 메뉴들을 조회하고, '치킨'을 'Chicken'으로 변경한 결과도 함께 보여주시오.
+USE delivery_app;
+
+-- 조회
+SELECT *
+FROM menus
+WHERE name LIKE '%치킨%';
+
+-- 변경 -- TODO 다른 값도 보여줘야하는지?
+SELECT REPLACE(name, '치킨', 'Chicken')
+FROM menus
+WHERE name LIKE '%치킨%';
 
 -- 문제 7
 -- STORES 테이블에서 가게명에 '점'을 'Store'로 바꾸어 조회하시오. (기존명, 변경명)
+SELECT name AS 기존명, REPLACE(name, '점', 'Store') AS 변경명
+FROM stores;
+
+SELECT CONCAT(name, ', ', REPLACE(name, '점', 'Store')) AS `(기존명, 변경명)`
+FROM stores;
+
+/*
+?? TODO 사용해보기
+-- REGEXP_REPLACE("문자열", "정규표현식", "치환문자열", "검색시작위치", "매칭순번", "일치옵션")
+SELECT REGEXP_REPLACE(name, REPLACE(name, '점', 'Store')) AS (기존명, 변경명)
+FROM stores;
+*/
 
 -- 문제 8
 -- MENUS 테이블에서 가격을 1000으로 나눈 나머지를 구하여 메뉴명, 가격, 나머지를 조회하시오.
+SELECT *
+FROM menus;
+
+SELECT name AS 메뉴명, price AS 가격,  price % 1000 AS 나머지
+FROM menus;
 
 -- 문제 9
 -- ORDERS 테이블에서 총 가격의 절댓값을 구하여 주문번호, 총가격, 절댓값을 조회하시오.
+USE delivery_db;
+
+SELECT order_id AS 주문번호, total_price AS 총가격, ABS(total_price) AS 절대값
+FROM orders; -- 절대값?! ABS?!
 
 -- 문제 10
 -- MENUS 테이블에서 가격을 1000으로 나눈 몫을 올림, 내림, 반올림하여 비교해보시오.
+SELECT CEIL(price / 1000) AS 올림, FLOOR(price / 1000) AS 내림, ROUND(price / 1000) AS 반올림
+FROM menus;
 
 -- 문제 11
 -- STORES 테이블에서 평점을 소수점 첫째 자리까지, 배달비를 백의 자리에서 반올림하여 조회하시오.
+SELECT ROUND(rating, 1), ROUND(delivery_fee, -3)
+FROM stores;
 
 -- 문제 12
 -- MENUS 테이블에서 가격이 10000원 이상인 메뉴들의 가격을 천 원 단위로 반올림하여 조회하시오.
+SELECT ROUND(price, -3)
+FROM menus
+WHERE price >= 10000;
 
 -- 문제 13
 -- ORDERS 테이블에서 고객 ID가 짝수인 주문들의 정보를 조회하시오. (MOD 함수 사용)
+SELECT * 
+FROM orders
+WHERE MOD(customer_id, 2) = 0;
 
 -- 문제 14
 -- STORES 테이블에서 최소 주문금액을 만 원 단위로 올림하여 조회하시오.
+SELECT CEIL(min_order_amount, 10000)
+FROM stores;
 
 -- 문제 15
 -- MENUS 테이블에서 인기메뉴 여부를 숫자로 변환하여 조회하시오. (TRUE=1, FALSE=0)
