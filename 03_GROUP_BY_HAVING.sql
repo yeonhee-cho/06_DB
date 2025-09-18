@@ -136,15 +136,17 @@ GROUP BY dept_code
 HAVING AVG(budget) >= 30000000; -- 그룹 budget(예산) 평균이 30000000 이상인 부서만 조회하겠다.
 */
 
--- 직원이 2명 이상인 부서 보기
 SELECT * FROM employees;
 
+-- 직원이 2명 이상인 부서 보기
 SELECT dept_id, COUNT(*)
 FROM employees
-WHERE count(*) >= 2; -- Error Code: 1111. Invalid use of group function	0.000 sec
+WHERE count(*) >= 2; 
+-- Error Code: 1111. Invalid use of group function
 -- 그룹 함수를 잘 못 사용했을 때 나타내는 문제
 
--- dept_id로 묶은 그룹에서 총 인원이 2명 이상인 부서 아이디만 조회
+-- dept_id로 묶은 그룹에서 총 인원이 
+-- 2명 이상인 부서 아이디만 조회
 SELECT dept_id, COUNT(*)
 FROM employees
 GROUP BY dept_id
@@ -154,6 +156,7 @@ HAVING count(*) >= 2;
 WHERE : 개별 직원 조건
 급여가 5천만원 이상인 직원 찾기
 WHERE salary >= 50000000
+
 HAVING : 부서나 그룹 조건
 평균 급여가 5천만원 이상인 "부서" 찾기
 HAVING AVG(salary) >= 50000000
@@ -182,3 +185,123 @@ FROM employees e, departments d
 WHERE e.dept_id = d.dept_id
 GROUP BY d.dept_name
 HAVING AVG(e.salary) >= 80000000;
+
+/**********************************************************
+수업용_SCRIPT_2를 활용하여 GROUP BY HAVING 실습하기
+기본 문법 순서
+SELECT 컬럼명, 집계함수()
+FROM 테이블이름
+WHERE 조건 -- 개별 행 하나씩에 대한 조건
+GROUP BY 컬럼명 -- 그룹 만들기 (SELECT ORDER에서 집계함수로 작성되지 않은 컬럼명칭 모두 작성)
+HAVING 집계조건 -- 조회할 그룹에 대한 조건
+ORDER BY -- 정렬 기준
+
+* 주의 할 점 : 
+  숫자 값에 NULL이 존재한다면 WHERE로 NULL을 먼저 필터링 처리
+  WHERE 컬럼이름 IS NOT NULL
+  과 같이 NULL이 존재하지 않는 데이터들을 통해서 조회
+
+-----------------------------------------------------
+
+집계함수
+COUNT(*) : 개수 세기
+AVG() : 합에 대한 평균
+MAX() : 최고로 높은 숫자
+MIN() : 최고로 낮은 숫자
+
+테이블 구조
+store (가게 테이블)
+번호, 가게명, 카테고리, 평점, 배달비
+id, name, category, rating, delivery_fee
+
+menus(메뉴 테이블)
+메뉴번호, 가게번호, 메뉴명, 가격, 인기메뉴여부
+id, store_id, name, price, is_popular
+**********************************************************/
+SELECT *
+FROM stores;
+-- stores 테이블에서
+-- 각 카테고리 별로 가게가 몇 개 씩 존재하는지 확인하기
+-- SELECT category AS 가게수
+SELECT category, COUNT(*) AS 가게수
+FROM stores
+GROUP BY category
+ORDER BY COUNT(*) DESC; -- COUNT(*) 내림차순 정렬
+
+-- stores 테이블에서
+-- 각 카테고리 별 평균 배달비 구하기
+-- null 존재하는지 확인하고, null이 아닌 배달비만 조회
+SELECT category, AVG(delivery_fee)
+FROM stores
+WHERE delivery_fee IS NOT NULL
+GROUP BY category;
+
+# 실습문제
+-- FROM stores
+-- 평점이 4.5 이상인 가게들만 골라서 카테고리별 개수 구하기
+SELECT category, AVG(rating), COUNT(*)
+FROM stores
+WHERE rating >= 4.5 -- 치킨 카테고리에서 가게별로 4.5 이상인 가게들만 조회하기
+GROUP BY category;
+
+SELECT category, AVG(rating), COUNT(*)
+FROM stores
+GROUP BY category
+HAVING AVG(rating) >= 4.5; -- 카테고리 별로 평점을 모은 후에 평점이 4.5 이상으로 그룹만 카테고리 조회 
+-- 위 문제랑은 맞지 않음
+
+/*
+0	95	14:38:19	SELECT category, AVG(rating), COUNT(*),
+FROM stores
+GROUP BY category
+HAVING AVG(rating) >= 4.5	Error Code: 1064. You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'FROM stores
+GROUP BY category
+HAVING AVG(rating) >= 4.5' at line 2	0.000 sec
+*/
+
+-- 배달비가 null이 아닌 가게들만으로 카테고리별 평균 평점 구하기,
+-- FUNCTION COUNT ROUND(AVG(rating), 2)
+SELECT category, ROUND(AVG(rating), 2)
+FROM stores
+WHERE delivery_fee IS NOT NULL
+GROUP BY category;
+
+-- 가게가 3개 이상인 카테고리만 보기
+-- 개수를 내림차순 정렬
+SELECT category, COUNT(*)
+FROM stores
+GROUP BY category
+HAVING COUNT(*) >= 3
+ORDER BY COUNT(*) DESC;
+
+
+-- 평균 배달비가 3000원 이상인 카테고리 구하기
+SELECT category, AVG(delivery_fee)
+FROM stores
+WHERE delivery_fee IS NOT NULL
+GROUP BY category
+HAVING AVG(delivery_fee) <= 3000
+ORDER BY AVG(delivery_fee);
+
+-- 가게별로 메뉴가 몇 개씩 존재하는지 조회
+-- 가게명, 카테고리 메뉴 개수 조회
+SELECT s.name, s.category, COUNT(*) AS 메뉴개수
+FROM stores s, menus m
+WHERE s.id = m.store_id
+GROUP BY s.name, s.category;
+
+SELECT s.name, s.category, COUNT(*) AS 메뉴개수
+FROM stores s, menus m
+WHERE s.id = m.store_id
+GROUP BY s.id;
+
+SELECT * FROM stores;
+
+SELECT menus.id, menus.store_id, menus.name, menus.description, menus.price, menus.is_popular
+FROM menus, stores
+WHERE menus.store_id = stores.id;
+
+SELECT category, COUNT(*)
+FROM menus, stores
+WHERE menus.store_id = stores.id
+GROUP BY category;
