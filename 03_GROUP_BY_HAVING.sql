@@ -177,8 +177,8 @@ HAVING SUM(salary) >= 150000000;
 -- WHERE dept_id
 -- employees e departments d 연결
 -- 평균 급여가 8천만원 이상인 부서의 이름 조회
-SELECT dept_name, salary
+SELECT d.dept_name, AVG(e.salary)
 FROM employees e, departments d 
-WHERE e.dept_name = d.dept_name
-GROUP BY salary
-HAVING AVG(salary) >= 80000000;
+WHERE e.dept_id = d.dept_id
+GROUP BY d.dept_name
+HAVING AVG(e.salary) >= 80000000;
