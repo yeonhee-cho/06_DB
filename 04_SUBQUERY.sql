@@ -245,3 +245,319 @@ SELECT name, delivery_fee
 FROM stores
 WHERE category = '일식'
 AND delivery_fee > (SELECT AVG(delivery_fee) FROM stores WHERE category = '한식');
+
+
+-- ====================================================================
+-- 2. 다중행 서브쿼리 (MULTI ROW SUBQUERY) N행 1열
+-- IN / NOT IN, > ANY / <ANY, > ALL < ALL, EXISTS / NOT EXISTS 사용
+-- 주요 연산자 : IN, NOT IN, ANY, ALL, EXISTS
+-- ====================================================================
+
+-- 1. IN 연산자 - 가장 많이 사용되는 다중행 서브쿼리
+
+-- 인기 메뉴가 있는 매장들 조회
+
+-- 1단계 : 인기 메뉴가 있는 매장 ID 들 확인
+SELECT DISTINCT store_id
+FROM menus
+WHERE is_popular = TRUE;
+
+-- 2단계 : 인기있는 매장 id들에 해당하는 매장 정보 찾기
+SELECT name, category, rating
+FROM stores
+WHERE id IN (SELECT DISTINCT store_id FROM menus WHERE is_popular = TRUE);
+
+SELECT s.name, s.category, s.rating, s.id, m.store_id
+FROM stores s, menus m
+WHERE s.id = m.store_id
+AND s.id IN (SELECT DISTINCT store_id FROM menus WHERE is_popular = TRUE);
+
+SELECT s.name, s.category, s.rating, s.id, m.store_id
+FROM stores s
+JOIN menus m ON s.id = m.store_id
+AND s.id IN (SELECT DISTINCT store_id FROM menus WHERE is_popular = TRUE);
+
+-- 2. NOT IN 연산자 - 
+-- 인기 메뉴가 없는 매장들 조회
+-- name, category, rating 
+-- 1단계 : 인기 메뉴가 있는 매장들 id 확인
+SELECT DISTINCT store_id
+FROM menus
+WHERE is_popular = TRUE;
+
+-- 2단계 : 1단계를 조합하여 그 id들에 해당하지 않는 매장들 가져오기
+SELECT name, category, rating 
+FROM stores
+WHERE id NOT IN(SELECT DISTINCT store_id FROM menus WHERE is_popular = TRUE);
+
+-- 치킨, 피자, 카테고리 매장들만 조회
+-- 1단계 : 치킨, 피자 카테고리 중복없이 확인
+SELECT DISTINCT name, category, rating
+FROM stores
+WHERE category IN('치킨', '피자');
+
+SELECT DISTINCT name, category, rating
+FROM stores
+WHERE category IN('치킨', '피자')
+ORDER BY category;
+
+-- TODO 여기부터 모르겠음 *******************************************************************************
+
+-- 2단계 : WHERE category = '치킨' OR category = '피자' 이용해서 출력 확인
+-- 1 + 2 단계를 조합하여 가게이름, 카테고리, 평점 조회
+-- IN 사용
+-- FROM stores
+SELECT DISTINCT s.name, s.category, s.rating
+FROM stores s, menus m
+WHERE s.id = m.store_id IN(SELECT DISTINCT category FROM stores WHERE category IN('치킨', '피자'));
+
+
+-- 20000원 이상 메뉴를 파는 매장들 조회
+-- 1단계 : 20000원 이상 메뉴를 가진 매장 id 들 확인
+SELECT store_id
+FROM menus
+WHERE price >= 20000;
+
+-- 2단계 : 1단계 결과를 조합하여 해당 매장들에 대한 정보 가져오기
+-- name, category, rating
+-- name 순으로 오름차순 정렬
+SELECT s.name, s.category, s.rating, m.price
+FROM stores s
+JOIN menus m ON s.id = m.store_id
+WHERE m.price > 20000;
+-- **************************************************************************
+
+/**********************************************************
+           다중행 서브쿼리 실습문제 (1 ~ 10 문제)
+           IN / NOT IN 연산자
+***********************************************************/
+-- =======================================
+-- NOT 
+-- 연산자를 포함하고 싶을 때
+-- 
+-- NOT IN 
+-- 연산자를 제외하고 싶을 때
+-- =======================================
+
+-- 문제 1: 카테고리별 최고 평점 매장들 조회
+-- 1단계: 카테고리별 최고 평점들 확인
+-- GROUP BY category
+SELECT category, MAX(rating)
+FROM stores
+GROUP BY category; -- 카테고리 별 가장 높은 평점만 조회
+
+SELECT category
+FROM stores
+GROUP BY category; -- SUM에 대한 결과인지, 평점인지, 가격을 합친건지, 나눈 것인지 카테고리 별로 무엇을 했는지 알 수 없음
+-- 문제에서 평점을 기준으로 가게 데이터를 조회하려 하기 때문에 
+-- 카테고리 별로 그룹을 짓고, 그룹별로 최고 평점만 조회하여
+-- 평점을 기준으로 가게 데이터 조회
+
+-- 2단계: 1단계 결과를 조합하여 각 카테고리의 최고 평점 매장들 가져오기
+SELECT *
+FROM stores
+WHERE (category, rating) IN (SELECT category, MAX(rating) FROM stores GROUP BY category);
+
+-- 문제 2: 배달비가 가장 저렴한 매장들의 인기 메뉴들 조회
+-- 0단계: 매장들 중에서 가장 저렴한 배달비 확인
+SELECT MIN(delivery_fee)
+FROM stores; -- min 함수에서 자동으로 null 값이 생략됨
+-- > 2000
+
+-- 0.5 단계 : WHERE 의 특성 알아보기
+/*
+0	330	15:25:35	SELECT *
+ FROM stores
+ WHERE delivery_fee = MIN(delivery_fee)
+ LIMIT 0, 500	Error Code: 1111. Invalid use of group function	0.000 sec
+ 
+SELECT *
+FROM stores
+WHERE delivery_fee = MIN(delivery_fee); -- WHERE에서는 직계함수를 쓸 수 없음
+ */
+-- WHERE 의 특성
+-- Error Code: 1111. Invalid use of group function	0.000 sec
+-- WHERE 절에는 MIN() MAC() AVG() 같은 함수를 직접적으로 사용할 수 없음
+-- WHERE 절은 테이블의 각 행을 하나씩 필터링하는 단계
+-- MIN() 함수는 WHERE 절의 필터링이 끝난 다음에 데이터를 그룹화해서 최소값을 계산하는 함수
+-- WHERE 절이 실행되는 시점에는 아직 MIN(delivery_fee) 값이 무엇인지 알 수 없기 때문에 문제가 발생 
+
+-- 1단계 : 매장 ID들 확인
+SELECT id
+FROM stores
+WHERE delivery_fee = (SELECT MIN(delivery_fee) FROM stores);
+
+-- 2단계: 1단계 결과를 조합하여 해당 매장들의 인기 메뉴들 가져오기
+-- JOIN stores s ON m.store_id = s.id
+SELECT * 
+FROM menus
+WHERE store_id IN(SELECT id FROM stores WHERE delivery_fee = (SELECT MIN(delivery_fee) FROM stores));
+/*
+AND is_popular = true;
+안써도
+20	8	맵슐랭	매콤달콤한 소스에 마요네즈가 더해진 치킨	19000	1
+31	14	블랙타이거 슈림프 피자 (L)	통통한 블랙타이거 슈림프가 가득 올라간 피자	35900	1
+32	14	포테이토 피자 (L)	고소한 감자와 부드러운 마요네즈의 조화	27900	1
+33	14	치즈 볼로네제 스파게티	진한 볼로네제 소스와 치즈의 만남	9800	1
+36	17	고구마 피자 (L)	달콤한 고구마 무스와 토핑이 듬뿍	28900	1
+					
+출력결과로 is_popular가 true인 것들만 나오는 이유는
+현재 데이터가 모두 is_popular만 존재하기 때문!
+데이터가 추가적으로 is_popular 가 false인 데이터가 들어온다면
+AND is_popular=true; 필수로 작성해야 1인 데이터만 조회가 될 것
+
+true = 1 
+false = 0
+*/
+
+-- 문제 4: 15000원 이상 메뉴가 없는 매장들 조회
+-- 1단계: 15000원 이상 메뉴를 가진 매장 ID들 확인
+SELECT DISTINCT store_id FROM menus WHERE price >= 15000;
+
+-- 2단계: 1단계 결과에 해당하지 않는 매장들 가져오기
+SELECT id, name, category, delivery_fee
+FROM stores
+WHERE id NOT IN(SELECT store_id FROM menus WHERE price >= 15000);
+
+-- 문제 5: 메뉴 설명이 있는 메뉴를 파는 매장들 조회
+-- 1단계: 메뉴 설명이 있는 메뉴를 가진 매장 ID들 확인
+SELECT * FROM menus;
+SELECT DISTINCT store_id FROM menus WHERE description IS NOT NULL;
+
+-- 2단계: 1단계 결과를 조합하여 해당 매장들 정보 가져오기
+SELECT * 
+FROM stores
+WHERE id IN (SELECT DISTINCT store_id FROM menus WHERE description IS NOT NULL);
+
+-- 문제 6: 메뉴 설명이 없는 메뉴만 있는 매장들 조회
+-- 1단계: 메뉴 설명이 있는 메뉴를 가진 매장 ID들 확인
+-- description IS NOT NULL : 설명 칸이 null이 아닌 데이터만 조회하겠다. 조건
+SELECT DISTINCT store_id FROM menus WHERE description IS NOT NULL;
+-- 2단계: 1단계 결과에 해당하지 않는 매장들 가져오기 (단, 메뉴가 있는 매장만)
+SELECT * 
+FROM stores
+WHERE id NOT IN (SELECT DISTINCT store_id FROM menus WHERE description IS NOT NULL);
+-- 가게이름을 바라보는 name,
+SELECT s.name, s.category
+FROM stores s, menus m
+WHERE s.id = m.store_id
+AND s.id NOT IN (SELECT DISTINCT store_id FROM menus WHERE description IS NOT NULL);
+
+-- 문제 7: 치킨 카테고리 매장들의 메뉴들 조회
+-- 1단계: 치킨 카테고리 매장 ID들 확인
+SELECT id 
+FROM stores
+WHERE category = '치킨';
+-- 2단계: 1단계 결과를 조합하여 해당 매장들의 메뉴들 가져오기
+SELECT *
+FROM menus
+WHERE store_id IN(SELECT id FROM stores WHERE category = '치킨');
+
+SELECT s.category, m.name, m.description, m.price
+FROM menus m, stores s 
+WHERE m.store_id = s.id
+AND store_id IN(SELECT id FROM stores WHERE category = '치킨');
+
+-- 문제 8: 피자 매장이 아닌 곳의 메뉴들만 조회
+-- 1단계: 피자 매장 ID들 확인
+SELECT id 
+FROM stores
+WHERE category = '피자';
+-- 2단계: 1단계 결과에 해당하지 않는 매장들의 메뉴들 가져오기
+SELECT *
+FROM menus
+WHERE store_id NOT IN(SELECT id FROM stores WHERE category = '피자');
+
+-- 문제 9: 평균 가격보다 비싼 메뉴를 파는 매장들 조회
+-- 1단계: 평균 가격보다 비싼 메뉴를 가진 매장 ID들 확인
+-- 0단계 : 메뉴들의 평균 가격 조회
+SELECT AVG(price)
+FROM menus; -- 15221.4286
+-- 1단계
+SELECT DISTINCT store_id
+FROM menus
+WHERE price > (SELECT AVG(price) FROM menus);
+
+-- 2단계: 1단계 결과를 조합하여 해당 매장들 정보 가져오기
+SELECT * 
+FROM stores
+WHERE id IN(SELECT DISTINCT store_id FROM menus WHERE price > (SELECT AVG(price) FROM menus));
+
+-- 문제 10: 가장 비싼 메뉴를 파는 매장들 조회
+-- 1단계: 가장 비싼 메뉴를 가진 매장 ID들 확인
+SELECT MAX(price) FROM menus; -- 38900
+
+SELECT store_id
+FROM menus
+WHERE price = 38900; -- 30
+
+SELECT store_id
+FROM menus
+WHERE price = (SELECT MAX(price) FROM menus);
+
+-- 2단계: 1단계 결과를 조합하여 해당 매장과 메뉴 정보 가져오기
+-- 가게 아이디, 메뉴이름, 메뉴 가격
+SELECT store_id, name, price
+FROM menus
+WHERE price = (SELECT MAX(price) FROM menus);
+
+-- 가게 이름까지 알고 싶은 경우
+SELECT m.store_id, s.name, m.name, m.price
+FROM menus m, stores s
+WHERE m.store_id = s.id
+AND m.price = (SELECT MAX(price) FROM menus);
+
+-- IN으로 변경하기
+SELECT m.store_id, s.name, m.name, m.price
+FROM menus m, stores s
+WHERE m.store_id = s.id
+AND s.id IN (SELECT store_id FROM menus WHERE price = (SELECT MAX(price) FROM menus));
+
+
+-- 1, 2, 9, 10번 난이도 상
+-- 4 ~ 8번 난이도 중
+
+-- =======================================
+-- 3. ANY 연산자 - IS NULL IS NOT NULL
+-- 하나라도 조건을 만족하면 참
+-- 여러 값 중 하나라도 만족하면 참
+-- 치킨 카테고리에서 배달비가 어떤 기준보다 작으면 만족하거나 어떤 기준보다 크면 만족
+-- =======================================
+
+-- 치킨 집 중 배달비가 3000이하로 저렴한 매장들 확인
+-- 1단계 : 치킨집들의 배달비 확인
+SELECT delivery_fee
+FROM stores
+WHERE category = '치킨'
+AND delivery_fee IS NOT NULL;
+
+-- 2단계 : 특정 값보다 작으면 조건 만족
+-- 배달비가 3000원 이하인 매장들 조회 
+SELECT *
+FROM stores
+WHERE delivery_fee <= 3000
+AND delivery_fee IS NOT NULL;
+
+-- ANY로 조합하여 치킨 카테고리에서 배달비 중 최저값보다 작은 매장을 만족하는 가게들의 이름, 카테고리 배달비 조회
+-- 가게들의 이름, 카테고리 배달비 조회
+SELECT name, category, delivery_fee
+FROM stores
+WHERE delivery_fee < ANY(SELECT delivery_fee FROM stores WHERE category = '치킨' AND delivery_fee IS NOT NULL)
+AND delivery_fee IS NOT NULL
+ORDER BY delivery_fee;
+
+
+-- =======================================
+-- 4. ALL 연산자 
+-- 모든 조건을 만족해야 참
+-- =======================================
+
+-- =======================================
+-- EXISTS 
+-- 연산자 존재하는 것을 찾기
+-- =======================================
+
+-- =======================================
+-- NOT EXISTS 
+-- 연산자 존재하지 않는 것을 찾기
+-- =======================================
