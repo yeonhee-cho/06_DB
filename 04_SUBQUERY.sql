@@ -213,19 +213,21 @@ AND rating = (SELECT MAX(rating) FROM stores WHERE category = '중식');
 
 -- 문제9: 피자집들의 평균 평점보다 높은 치킨집들
 -- 1단계: 피자집들의 평균 평점 구하기
-SELECT AVG(rating) FROM stores WHERE category = '피자';
+SELECT AVG(rating) 
+FROM stores 
+WHERE category = '피자';
 
 -- 2단계: 그보다 높은 평점의 치킨집들 찾기 (매장명, 평점)
 SELECT name AS 매장명, rating AS 평점
 FROM stores
 WHERE category = '치킨'
-AND rating > 4.7;
+AND rating > 4.70000;
 
 -- 조합 : 1단계 2단계를 조합하여 한 번에 조회하기
 SELECT name AS 매장명, rating AS 평점
 FROM stores
 WHERE category = '치킨'
-AND rating > (SELECT MAX(rating) FROM stores WHERE category = '피자');
+AND rating > (SELECT AVG(rating) FROM stores WHERE category = '피자');
 
 
 -- 문제10: 한식집들의 평균 배달비보다 저렴한 일식집들 (NULL 제외)
@@ -235,6 +237,11 @@ SELECT AVG(delivery_fee) FROM stores WHERE category = '한식' AND delivery_fee 
 -- 2단계: 그보다 저렴한 배달비의 일식집들 찾기 (매장명, 배달비)
 SELECT name, delivery_fee
 FROM stores
-3200.00
+WHERE category = '일식'
+AND delivery_fee > 3200.00;
 
 -- 조합 : 1단계 2단계를 조합하여 한 번에 조회하기
+SELECT name, delivery_fee
+FROM stores
+WHERE category = '일식'
+AND delivery_fee > (SELECT AVG(delivery_fee) FROM stores WHERE category = '한식');
