@@ -69,18 +69,23 @@ VALUES (
 null, 'sarah_lee', 'passwordabc', 'sarah@example.com', '박미영', '010-3333-9999', '1995-03-10', 'f', '광주시 서구', now(), 'INACTIVE'
 );
 
-
 INSERT INTO member
 VALUES (
 null, 'sarah_lee', 'abc1234', 'meyoung@example.com', '오미영', '010-4567-1234', '1998-04-10', 'f', '서울시 서초구', now(), 'ACTIVE'
 );
 
+-- ================================================
+-- INSERT 구문 여러 행을 한 번에 입력
+-- INSERT INTO 테이블이름 
+--        VALUES (데이터1, 데이터1, 데이터1, ...),
+--               (데이터2, 데이터2, 데이터2, ...),
+--               (데이터3, 데이터3, 데이터3, ...);
+-- , 로 구분하여 여러 행을 한 번에 입력 후, 데이터를 저장할 수 있다.
+-- ================================================
+
 INSERT INTO member
-VALUES
-(NULL, 'mini1004', 'pass5678', 'mini1004@gamil.com', '김미니', '010-6666-7777', '2001-02-02', 'F', '서울시 강남구 역삼동', NOW(), 'ACTIVE'),
+VALUES (NULL, 'mini1004', 'pass5678', 'mini1004@gamil.com', '김미니', '010-6666-7777', '2001-02-02', 'F', '서울시 강남구 역삼동', NOW(), 'ACTIVE'),
        (NULL, 'soo5678', 'pass9999', 'soo1004@gamil.com', '한철수', '010-8888-9999', '2002-03-03', 'M', '서울시 동작구 흑석동', NOW(), 'ACTIVE');
-
-
 
 -- ================================================
 -- INSERT 필수 컬럼만 입력 -> 모든 컬럼에 데이터를 넣지 않고
@@ -115,8 +120,9 @@ VALUES
 */
 
 INSERT INTO member (username, password, email, name)
-VALUES ('user_basic1', 'basicpass123', 'basic1@email.com', '기본유저1'),
-('user_basic2', 'basicpass456', 'basic2@email.com', '기본유저2'), 
+VALUES ('user_basic1', 'basicpass123', 'basic1@email.com', '기본유저1');
+INSERT INTO member (username, password, email, name)
+VALUES ('user_basic2', 'basicpass456', 'basic2@email.com', '기본유저2'), 
 ('user_basic3', 'basicpass789', 'basic3@email.com', '기본유저3');
 SELECT * FROM MEMBER;
 
@@ -219,7 +225,7 @@ VALUES('부산시 해운대구 우동', 'ACTIVE', 'M', '1975-05-25', '010-8888-9
 회원4: 최유진, yujin_choi, yujinpass4, yujin@hanmail.net, 010-7070-8080, F  
 회원5: 장태현, taehyun_jang, taepass5, taehyun@korea.kr, 010-9090-1010, M
 */
-
+/*
 -- 회원1 순서: name, username, password, email, phone, gender
 INSERT INTO member (name, username, password, email, phone, gender)
 VALUES('김민수', 'minsoo_kim', 'minpass1', 'minsoo@gmail.com', '010-1010-2020', 'M');
@@ -239,3 +245,62 @@ VALUES ('F', '최유진', '010-7070-8080', 'yujin@hanmail.net', 'yujin_choi', 'y
 -- 회원5 순서: phone, email, gender, username, password, name
 INSERT INTO member (phone, email, gender, username, password, name)
 VALUES('010-9090-1010', 'taehyun@korea.kr', 'M', 'taehyun_jang', 'taepass5', '장태현');
+*/
+
+-- =============================================
+-- UPDATE 이미 존재하는 데이터의 값을 수정(변경)할 때 사용하는 조작 언어
+-- UPDATE 테이블이름
+-- SET 컬럼명1 = 새롭게 추가할 값1,
+-- SET 컬럼명2 = 새롭게 추가할 값2,
+-- ...
+-- WHERE 조건;
+-- 주의할 점 : WHERE 절이 없으면 해당 테이블의 모든 데이터가 
+-- 한 번에 변경되므로 데이터 유실이 발생할 수 있음
+-- 모든 데이터를 한 번에 변경해야하는 일이 없으면 WHERE 사용 필수
+
+-- UPDATE는 ERROR가 거의 일어나지 않음
+-- 왜냐하면 WHERE에 해당하는 조건을 찾고, 해당하는 조건이 없으면 없는대로..
+-- 있으면 있는 조건에 맞춰 변경하기 때문
+-- =============================================
+
+-- username 이 hong1234 인 홍길동 회원의 핸드폰 번호를 변경
+-- WHERE 절을 이용해서 특정 회원 한 명만 정확히 변경하는게 중요!!
+
+UPDATE member
+SET phone = '010-8765-4321'
+WHERE username = 'hong1234';
+
+UPDATE member
+SET email = 'honghong@gamil.com'
+WHERE username = 'hong1234';
+
+-- UPDATE가 무사히 될 경우 1row 1행 변경 변환
+-- 1 row(s) affected Rows matched: 1  Changed: 1  Warnings: 0	0.016 sec
+UPDATE member
+SET email = 'honghong@gamil.com',
+	address = '인천시 남구'
+WHERE username = 'hong1234';
+
+-- username이 존재하지 않을 경우에도 에러가 발생하지 않는다.
+-- 못 찾은 상태 그대로 변경된 데이터가 0으로 조회
+-- 0 row(s) affected Rows matched: 0  Changed: 0  Warnings: 0	0.000 sec
+UPDATE member
+SET email = 'honghong@gamil.com',
+	address = '인천시 남구'
+WHERE username = 'hong12343333';
+
+SELECT * FROM member WHERE username = 'hong1234';
+SELECT * FROM member;
+
+-- 1175 : 모든 데이터를 한 번에 수정하거나 삭제하는 것을 방지하기 위한 MYSQL의 안전장치!!
+-- 안전모드 비활성화
+SET SQL_SAFE_UPDATES = 0;
+-- Error Code: 1175. You are using safe update mode and you tried to update a table without a WHERE that uses a KEY column. 
+-- To disable safe mode, toggle the option in Preferences -> SQL Editor and reconnect.	0.000 sec
+UPDATE member
+SET join_date = CURRENT_TIMESTAMP;
+
+-- 안전 모드 활성화
+SET SQL_SAFE_UPDATES = 1;
+
+-- 안전모드는 존재하는 이유가 있음 왠만하면 비활성화 해지 금지!!!
