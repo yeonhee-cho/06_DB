@@ -304,3 +304,28 @@ SET join_date = CURRENT_TIMESTAMP;
 SET SQL_SAFE_UPDATES = 1;
 
 -- 안전모드는 존재하는 이유가 있음 왠만하면 비활성화 해지 금지!!!
+
+
+-- 문제 1: username이 'mike_wilson'인 이철수 회원의 이메일 주소를 'mike.w@naver.com'으로 변경하세요.
+UPDATE member
+SET email = 'mike.w@naver.com'
+WHERE username = 'mike_wilson';
+
+-- 문제 2: member_id가 5번인 회원의 상태(status)를 'SUSPENDED'로, 주소(address)를 '확인 필요'로 변경하세요.
+UPDATE member
+SET status = 'SUSPENDED',
+	address = '확인 필요'
+WHERE member_id = '5';
+
+-- 문제 3: 1990년 이전에 태어난 모든 회원의 상태(status)를 'INACTIVE'로 변경하세요.
+-- Error Code: 1175. You are using safe update mode and you tried to update a table without a WHERE that uses a KEY column. Delimiter '.' in position 4 in datetime value '1990.01.01' at row 1 is deprecated. Prefer the standard '-'.
+-- To disable safe mode, toggle the option in Preferences -> SQL Editor and reconnect.	0.000 sec
+UPDATE member
+SET status = 'INACTIVE'
+WHERE birth_date < '1990.01.01';
+
+SELECT * 
+FROM member
+WHERE birth_date < '1990.01.01';
+
+SELECT * FROM member;
