@@ -354,15 +354,36 @@ GROUP BY category; -- SUM에 대한 결과인지, 평점인지, 가격을 합친
 -- 평점을 기준으로 가게 데이터 조회
 
 -- 2단계: 1단계 결과를 조합하여 각 카테고리의 최고 평점 매장들 가져오기
-SELECT *
+-- USE delivery_app;
+SELECT name, category, rating
 FROM stores
-WHERE (category, rating) IN (SELECT category, MAX(rating) FROM stores GROUP BY category);
+WHERE (category, rating) IN (SELECT category, MAX(rating) FROM stores GROUP BY category)
+ORDER BY category, rating DESC;
+
+SELECT
+    s1.name,
+    s1.category,
+    s1.rating
+FROM
+    stores s1
+JOIN (
+    SELECT
+        category,
+        MAX(rating) as max_rating
+    FROM
+        stores
+    GROUP BY
+        category
+) s2 ON s1.category = s2.category AND s1.rating = s2.max_rating 
+ORDER BY
+    s1.category, s1.name;
 
 -- 문제 2: 배달비가 가장 저렴한 매장들의 인기 메뉴들 조회
 -- 0단계: 매장들 중에서 가장 저렴한 배달비 확인
 SELECT MIN(delivery_fee)
 FROM stores; -- min 함수에서 자동으로 null 값이 생략됨
--- > 2000
+-- > 2000 원 나온 결과
+
 
 -- 0.5 단계 : WHERE 의 특성 알아보기
 /*
@@ -538,7 +559,7 @@ FROM stores
 WHERE delivery_fee <= 3000
 AND delivery_fee IS NOT NULL;
 
--- ANY로 조합하여 치킨 카테고리에서 배달비 중 최저값보다 작은 매장을 만족하는 가게들의 이름, 카테고리 배달비 조회
+-- ANY로 조합하여 치킨 카테고리에서 배달비 중 최고값보다 작은 매장을 만족하는 가게들의 이름, 카테고리 배달비 조회
 -- 가게들의 이름, 카테고리 배달비 조회
 SELECT name, category, delivery_fee
 FROM stores
@@ -547,15 +568,162 @@ AND delivery_fee IS NOT NULL
 ORDER BY delivery_fee;
 
 
+-- 문제 1: 한식집들 중 어떤 매장보다 평점이 높은 매장들을 찾아주세요.
+
+-- 1단계: 한식집들의 평점 확인
+SELECT * FROM stores;
+SELECT * 
+FROM stores
+WHERE category = '한식'
+AND rating IS NOT NULL;
+-- 2단계: 한식집 중 어느 매장보다 높은 평점의 매장들 (가장 작은 값 4.2보다 크면 ANY 조건 만족)
+SELECT * FROM stores
+WHERE rating > 4.2
+AND rating IS NOT NULL;
+
+-- 3단계: ANY로 조합
+SELECT * FROM stores
+WHERE rating > ANY(SELECT rating 
+FROM stores
+WHERE category = '한식'
+AND rating IS NOT NULL
+)
+AND rating IS NOT NULL;
+
+SELECT * FROM stores
+WHERE rating > ANY(SELECT rating 
+FROM stores
+WHERE category = '한식'
+AND rating IS NOT NULL
+)
+AND rating IS NOT NULL
+AND category NOT IN ('한식'); -- 한식을 제외한 카테고리 조회 추가
+
+-- 문제 2: 일식집들을 기준으로 배달비가 최고점을 기준으로 저렴한 매장들을 찾아주세요.
+-- 1단계: 일식집들의 배달비 확인
+SELECT * FROM stores
+WHERE category = '일식'; 
+-- 4000 3000 3500 3000 4000
+
+-- 2단계: 일식집 중 어느 매장보다든 저렴한 매장들 (가장 큰 값 4000보다 작으면 ANY 조건 만족)
+SELECT * FROM stores 
+WHERE delivery_fee < 4000
+AND delivery_fee IS NOT NULL; 
+
+-- 3단계: ANY로 조합
+SELECT * FROM stores 
+WHERE delivery_fee < ANY (SELECT delivery_fee 
+FROM stores
+WHERE category = '일식')
+AND delivery_fee IS NOT NULL; 
+
 -- =======================================
 -- 4. ALL 연산자 
 -- 모든 조건을 만족해야 참
 -- =======================================
 
+-- 모든 치킨집보다 배달비가 저렴한 매장들
+-- 1단계 : 치킨집들의 배달비 확인
+SELECT * FROM stores;
+SELECT delivery_fee FROM stores
+WHERE category = '치킨';
+
+-- 2단계 : 모든 치킨집 중 배달비가 가장 낮은 치킨집을 기준으로 하여 타 카테고리 매장들 중에서 
+-- 치킨 카테고리에서 최저 배달비 기준으로 낮은 매장들 검색
+SELECT * FROM stores
+WHERE delivery_fee < 2000;
+
+-- 가장 작은 치킨 카테고리 배달비 값보다 작은 데이터만 모두 만족
+SELECT * FROM stores
+WHERE delivery_fee < ALL (
+SELECT delivery_fee FROM stores
+WHERE category = '치킨');
+-- JAVA 에서는 DB에서 전달받은 데이터가 0개 일 것이고, HTML로 0개를 전달하고
+-- HTML 에서는 조회된 결과가 없습니다. 를 유저들에게 보여줌
+-- DB에서 OUTPUT 화면에 X가 안뜨면 조회된 결과가 없는 것 !!!
+
 -- =======================================
 -- EXISTS 
 -- 연산자 존재하는 것을 찾기
+-- EXISTS = TRUE / FALSE 만 봄
+--          존재 유무를 단순히 확인하기 때문에 1과 같은 숫자값으로 빠르게 데이터를 가져올 수 있도록 설정
+--  보통 TRUE = 1  FALSE = 0 
+-- 존재하면 1이라는 숫자가 몇 개 뜨는지만 조회할 때 주로 사용
+-- 컬럼 내부 값은 궁금하지 않고, 단순히 존재유무에 대한 결과를 보고 싶을 때 사용하는 단순 숫자 표기
+-- 숫자 값은 개발자가 넣고 싶은 숫자 값을 마음껏 넣어도 되지만 보통 존재할 때는 1 존재하지 않을 때는 0 사용
+-- EXISIS 사용 방법
+/*
+WHERE EXISTS (
+     SELECT 1
+	 FROM 다른테이블 별칭
+     WHERE 별칭.외래키 = 현재테이블별칭.기본키
+     AND 추가조건들
+
+)
+*/
 -- =======================================
+
+-- 메뉴가 존재하는 매장들 찾기
+-- 1단계 : 각 매장별로 메뉴가 있는지 확인
+-- 예를 들어 매장 ID = 1 인 매장에 메뉴가 존재하는지 확인
+-- sotre_id =1 인 매장들에 메뉴가 존재하는지 확인
+
+-- store_id = 1 인 데이터를 기준으로 조회했을 때 모든 컬럼에 대한 결과를 가져옴
+SELECT * FROM menus;
+SELECT * FROM menus
+WHERE store_id = 1;
+
+-- SELECT 1은 내부의 컬럼 데이터가 궁금한 것이 아니라 데이터가 존재하는지 확인 유무
+-- 보통 TRUE = 1  FALSE = 0 
+-- 존재하면 1이라는 숫자가 몇 개 뜨는지만 조회할 때 주로 사용
+-- 컬럼 내부 값은 궁금하지 않고, 단순히 존재유무에 대한 결과를 보고 싶을 때 사용하는 단순 숫자 표기
+-- 숫자 값은 개발자가 넣고 싶은 숫자 값을 마음껏 넣어도 되지만 보통 존재할 때는 1 존재하지 않을 때는 0 사용
+SELECT 1
+FROM menus
+WHERE store_id = 1;
+
+SELECT name, category
+FROM stores s
+WHERE EXISTS (SELECT 1
+FROM menus m
+WHERE m.store_id = s.id);
+-- menus 에서 store_id 가 stores 와 같은 id가 존재할 경우에만 출력
+-- 모든 가게가 모든 메뉴를 가지고 있기 때문에 모두 조회가 되지만
+-- 배달의민족에서 가게를 오픈하기만하고 메뉴가 존재하지 않는 매장의 경우 출력 되지 않음
+-- 가게 & 메뉴가 존재하는 사업자들에게 메뉴마다 배민자체에서 메뉴 10% 할인 이벤트 제공
+-- 모든 부담은 배달어플 측에서 제공할 때 사용
+-- 메뉴가 없는 가게는 이벤트 제외
+
+
+-- 설명(description)이 있는 메뉴를 파는 매장들을 찾아주세요.
+-- 1단계 : 설명이 있는 메뉴를 가진 매장 ID들 확인
+SELECT store_id
+FROM menus
+WHERE description is not null; 
+
+-- 2단계 EXISTS 와 1을 활용하여 조합
+-- EXISTS = TRUE / FALSE 만 봄
+--          존재 유무를 단순히 확인하기 때문에 1과 같은 숫자값으로 빠르게 데이터를 가져올 수 있도록 설정
+-- store_id 연결 조건이 없기 때문에 단순히 설명이 있는 메뉴가 전체에서 존재하나요? 만 확인하는 상태
+SELECT *
+FROM stores
+WHERE EXISTS (
+SELECT store_id
+FROM menus
+WHERE description is not null
+);
+-- 설명이 없는 메뉴까지 모두 합쳐져서 매장들 조회
+
+-- 매장 중에서 메뉴에 설명이 존재하는 데이터만 조회
+-- m.store_id = s.id 메뉴와 가게가 서로 연결된 데이터만 조회할 수 있도록 설정
+SELECT *
+FROM stores s
+WHERE EXISTS (
+SELECT store_id
+FROM menus m
+WHERE m.store_id = s.id
+AND m.description is not null
+);
 
 -- =======================================
 -- NOT EXISTS 
