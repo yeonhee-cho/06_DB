@@ -64,12 +64,14 @@ SET phone = '010-1111-9999'
 WHERE customer_id = '1';
 
 -- 문제 9
--- 'BHC치킨 역삼점' 매장의 배달비를 2500원으로, 최소주문금액을 15000원으로 변경하시오.
-SELECT * FROM stores;
-SET SQL_SAFE_UPDATES = 1;
+-- 'BHC치킨 역삼점' 매장의 배달비를 2500원으로, 
+-- 최소주문금액을 15000원으로 변경하시오.
 UPDATE stores
 SET delivery_fee = '2500', min_order_amount = '15000'
 WHERE store_name = 'BHC치킨 역삼점';
+SELECT * FROM stores;
+SET SQL_SAFE_UPDATES = 1;
+
 
 -- 문제 10
 -- menu_id가 1번인 메뉴(뿌링클)의 가격을 23000원으로 변경하고, 설명을 '리뉴얼된 뿌링클! 더욱 바삭해진 식감'으로 수정하시오.
