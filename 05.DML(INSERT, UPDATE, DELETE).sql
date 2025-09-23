@@ -419,3 +419,5 @@ WHERE id IN (1, 2, 3);
 -- DELETE FROM store_dev_test WHERE을 이용하여 이름에 치킨이 포함된 매장 모두 삭제
 DELETE FROM store_dev_test 
 WHERE name LIKE '%치킨%';
+
+DROP TABLE store_dev_test;
