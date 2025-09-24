@@ -1,3 +1,6 @@
+CREATE DATABASE practice_db;
+USE practice_db;
+
 -- 1. 데이터베이스 생성 및 사용
 -- 힌트: CREATE DATABASE, USE
 CREATE DATABASE _________;
@@ -10,7 +13,7 @@ CREATE TABLE BOOK(
     _________ VARCHAR(100) _________,
     _________ VARCHAR(50),
     _________ INT _________,
-    _________ INT _________ _________
+    _________ INT _________ _________practice 08
 );
 
 -- 3. 데이터 삽입 (3권의 책)

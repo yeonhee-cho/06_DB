@@ -122,6 +122,45 @@ ALTER TABLE department ADD UNIQUE(dept_title);
 -- CHECK 제약조건 IN을 활용하여 다수의 location_id에 추가
 ALTER TABLE department ADD CHECK(location_id IN('L1', 'L2', 'L3', 'L4', 'L5'));
 
+-- employee 테이블에 외래키를 dept_code에 추가
+-- department dept_id 참조
+ALTER TABLE employee ADD FOREIGN KEY(dept_code) REFERENCES department(dept_id);
+
 -- CONSTRAINT 제약조건명칭
 -- 테이블 자체에서 컬럼에 제약조건을 추가하는 것이기 때문에 CONSTRAINT 테이블 레벨로 기본키를 추가한 것
 -- MySQL에서는 컬럼 레벨에서 CHECK 이 외에는 모두 제약조건 명칭을 사용할 수 없음!
+
+
+-- employee 테이블에 NOT NULL 제약조건을 emp_name에 추가
+ALTER TABLE employee MODIFY emp_name VARCHAR(30) NOT NULL;
+
+-- ADD로는 NOT NULL의 제약 조건을 추가할 수 없다.
+-- ADD로 제약조건을 추가할 때 사용 가능한 제약조건 : PK, FK, UNIQUE, CHECK, 자료형(INT, VARCHAR, ...), 새로운컬럼이름추가 등
+-- NOT NULL은 제약조건이 아니라 컬럼의 속성으로 취급되며, 컬럼 속성 변경을 할 때는 MODIFY를 사용해야 함
+-- 불가!! ALTER TABLE employee ADD emp_name VARCHAR(30) NOT NULL;
+
+-- employee 테이블에 NOT NULL 제약조건을 emp_no에 추가
+ALTER TABLE employee MODIFY emp_no VARCHAR(14) NOT NULL;
+
+-- department 테이블에 mgr_id 컬럼을 INT 타입으로 추가
+-- 새로운 컬럼을 추가할 때는 ADD COLUMN 이라는 예약어를 사용
+ALTER TABLE department ADD COLUMN mgr_id INT;
+-- ALTER TABLE department MODIFY mgr_id INT;
+-- Error : 1054 MODIFY의 경우 이미 존재하는 컬럼에서만 가능
+
+-- department 테이블에 create_date 컬럼을 TIMESTAMP 타입으로 기본값 CURRENT_TIMESTAMP로 추가
+ALTER TABLE department ADD COLUMN create_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
+SELECT * FROM department;
+-- ADD만 가능
+
+-- department 테이블에서 create_date 컬럼을 삭제
+-- ALTER TABLE department DELETE COLUMN create_date; -- DELETE 아니고 DROP
+-- INSERT UPDATE DELET : 컬럼 내부에 존재하는 데이터만 가능
+
+-- 데이터 이상의 작업을 진행할 때는 CREATE ALTER DROP에서 진행
+ALTER TABLE department DROP COLUMN create_date;
+-- ERROR : 1091 의 경우 삭제해야하는 컬럼이 존재하지 않을 때 발생
+-- Error Code: 1091. Can't DROP 'create_date'; check that column/key exists	0.000 sec
+
+-- 특정 컬럼의 명칭 변경 RENAME TO
+ALTER TABLE department RENAME COLUMN dept_title TO dept_name;
