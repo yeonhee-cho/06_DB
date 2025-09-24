@@ -350,31 +350,51 @@ SELECT * FROM employees;
 SET SQL_SAFE_UPDATES = 1;
 
 -- 문제 5-2: 각 부서에서 가장 높은 급여를 받는 직원의 직급을 '팀장'으로 변경하세요.
--- 부서에서 가장 높은 급여
+-- 부서 나누기
+SELECT department FROM employees; 
+-- 가장 높은 급여
 SELECT MAX(salary) 
 FROM employees;
+
+SELECT MAX(salary) 
+FROM employees GROUP BY department;
 
 -- 각 부서에서 가장 높은 급여를 받는 직원
 SELECT * FROM employees
 WHERE salary IN (SELECT MAX(salary) FROM employees)
 GROUP BY department;
--- 
 
+-- 직급 '팀장'으로 변경
 
 -- 문제 5-3: 'COMPLETED' 상태인 프로젝트의 매니저들의 급여를 20% 인상하세요.
+-- 매니저아이디 구하기
+SELECT manager_id FROM projects WHERE status = 'COMPLETED';
 
-
-
+UPDATE employees
+SET salary = (salary * 1.2)
+WHERE emp_id IN (SELECT manager_id FROM projects WHERE status = 'COMPLETED');
+SELECT * FROM projects;
+SELECT * FROM employees;
 -- ========================================
 -- 6. DELETE 문제
 -- ========================================
 
 -- 문제 6-1: 재직하지 않는 직원(is_active = FALSE)들을 삭제하세요.
-
-
+DELETE 
+FROM employees
+WHERE is_active = FALSE;
 
 -- 문제 6-2: 급여가 3000000 미만이고 2024년 이전에 입사한 직원들을 삭제하세요.
+DELETE 
+FROM employees
+WHERE salary < 3000000 
+AND hire_date < '2024-01-01';
 
-
+SELECT * FROM employees;
 
 -- 문제 6-3: 'CANCELLED' 상태인 프로젝트들을 모두 삭제하세요.
+DELETE 
+FROM projects
+WHERE status = 'CANCELLED';
+
+SELECT * FROM projects;
