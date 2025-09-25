@@ -202,3 +202,5 @@ DROP DATABASE 네이버;
 DROP DATABASE 라인;
 DROP DATABASE 스노우;
 DROP DATABASE employee_management;
+
+-- sys는 삭제 금지
