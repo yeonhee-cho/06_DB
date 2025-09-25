@@ -164,3 +164,41 @@ ALTER TABLE department DROP COLUMN create_date;
 
 -- 특정 컬럼의 명칭 변경 RENAME TO
 ALTER TABLE department RENAME COLUMN dept_title TO dept_name;
+
+-- 테이블 삭제
+-- 다수의 SQL : DROP TABLE 테이블명 [CASCADE CONSTRAINTS];
+-- MySQL : DROP TABLE 테이블명;
+--         외래키 활성화 비활성화 후 부모 테이블 삭제여부 결정
+
+DROP TABLE book;
+-- ERROR : 3730. ORDER_DETAI: 테이블에서 외래키에 의해 참조되고 있음
+-- 방법 3가지 : 
+-- 자식 -> 부모 순서대로 삭제하거나 
+-- 외래키 제약조건만 삭제
+-- 외래키 체크 임시 비활성화를 통해 삭제
+
+-- 방법 1번을 활용한 삭제
+DROP TABLE book;
+DROP TABLE order_detail;
+-- Error Code: 1051. Unknown table 'practice_db.order_detail'	0.000 sec -- 알 수 없는 테이블, 존재하지 않는 테이블일 경우
+-- Error Code: 3730. Cannot drop table 'book' referenced by a foreign key constraint 'order_detail_ibfk_2' on table 'order_detail'.	0.016 sec
+
+DROP TABLE order_detail;
+DROP TABLE BOOK;
+-- practice_db에 있는 테이블 삭제
+-- customer department employee product 모두 삭제
+USE practice_db;
+DROP TABLE customer;
+DROP TABLE department;
+DROP TABLE employee;
+DROP TABLE product;
+
+DROP DATABASE practice_db; -- 데이터 베이스 삭제
+-- bookstore ~ 스노우까지 모두 삭제
+DROP DATABASE chun_university;
+DROP DATABASE delivery_app;
+DROP DATABASE delivery_db;
+DROP DATABASE 네이버;
+DROP DATABASE 라인;
+DROP DATABASE 스노우;
+DROP DATABASE employee_management;
