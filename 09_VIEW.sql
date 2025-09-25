@@ -135,4 +135,4 @@ SELECT * FROM reviews;
 
 SELECT b.brand_name, b.brand_description, c.category_name
 FROM brands b, categories c
-WHERE b.brand_id = c.brand_id;
+WHERE b.brand_id = c.brand_id; -- c에는 brand_id가 없음
