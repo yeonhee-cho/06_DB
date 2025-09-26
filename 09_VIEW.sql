@@ -223,4 +223,4 @@ OR brand_name = '%KEYWORD%'
 OR category_name = '%KEYWORD%';
 
 -- 자바에서 JOIN 관련 SQL문이 제일 힘듬!
--- 변수 이름 설정
+-- 변수 이름 설정;

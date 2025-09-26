@@ -204,3 +204,11 @@ DROP DATABASE 스노우;
 DROP DATABASE employee_management;
 
 -- sys는 삭제 금지
+
+USE tje;
+-- TRUNCATE TABLE brands;
+-- Error Code: 1701. Cannot truncate a table referenced in a foreign key constraint (`tje`.`products`, CONSTRAINT `products_ibfk_2`)	0.000 sec
+SET FOREIGN_KEY_CHECKS = 0;
+-- 내부 데이터만 삭제
+TRUNCATE TABLE brands;
+SELECT * FROM brands;
