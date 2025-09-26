@@ -47,10 +47,19 @@ REVOKE SELECT, INSERT, UPDATE ON tje.employees FROM 'office_user'@'192.168.1.100
 -- network_user 에게는 SELECT INSERT UPDATE 권한 동시 부여
 -- tje 데이터베이스에서 모든 테이블에 접근 권한이 있는 유저
 -- 조회 수정 저장은 가능하나 삭제가 불가능한 유저
-GRANT SELECT, INSERT, UPDATE ON tje.employees TO 'network_user'@'192.168.1.%';
+GRANT SELECT, INSERT, UPDATE ON tje.* TO 'network_user'@'192.168.1.%';
+
+/*
+GRANT SELECT ON tje.* TO 'network_user'@'192.168.1.%'; -- SELECT
+GRANT INSERT, UPDATE ON tje.* TO 'network_user'@'192.168.1.%'; -- SELECT, INSERT, UPDATE
 
 -- 권한 회수
-REVOKE SELECT, INSERT, UPDATE ON tje.employees FROM 'network_user'@'192.168.1.%';
+REVOKE SELECT ON tje.* FROM 'network_user'@'192.168.1.%'; -- SELECT
+REVOKE INSERT, UPDATE ON tje.* FROM 'network_user'@'192.168.1.%'; -- SELECT, INSERT, UPDATE
+*/
+
+-- 권한 회수
+REVOKE SELECT, INSERT, UPDATE ON tje.* FROM 'network_user'@'192.168.1.%';
 
 -- 'remote_user'@'%' 모든 권한 부여
 -- 회사에 존재하는 모든 데이터베이스 모든 테이블에 접근 권한이 있는 유저 
